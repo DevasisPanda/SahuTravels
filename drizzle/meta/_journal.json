@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1778048886594,
+      "tag": "0000_eager_rictor",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1778049048917,
+      "tag": "0001_spooky_falcon",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1778289554801,
+      "tag": "0002_equal_tana_nile",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1778493467758,
+      "tag": "0003_giant_quicksilver",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1781748964589,
+      "tag": "0004_wooden_crusher_hogan",
+      "breakpoints": true
+    }
+  ]
+}
