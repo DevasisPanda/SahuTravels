@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle, Users, Zap, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import HeroCarousel from "@/components/HeroCarousel";
 import { trpc } from "@/lib/trpc";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const defaultSlides = [
   {
@@ -44,6 +45,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const bannersQuery = trpc.banners.list.useQuery();
   const [slides, setSlides] = useState(defaultSlides);
+  const { get } = useSiteSettings();
 
   // Use uploaded banners if available, otherwise use defaults
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function Home() {
   }, [bannersQuery.data]);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="bg-black text-white">
       {/* Hero Carousel */}
       <HeroCarousel slides={slides} />
 
@@ -154,9 +156,9 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black rounded-lg p-12 border-4 border-yellow-400">
             <h2 className="text-5xl font-bold mb-4">🎉 Special Offer!</h2>
-            <p className="text-2xl font-bold mb-6">20% Discount on Online Bookings</p>
+            <p className="text-2xl font-bold mb-6">{get("discount_percent")}% Discount on Online Bookings</p>
             <p className="text-lg mb-8">
-              Valid for both AC and Non-AC buses. Book your journey now and save!
+              {get("discount_description")}
             </p>
             <Button
               onClick={() => setLocation("/booking")}
@@ -173,10 +175,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             {[
-              { number: "35+", label: "Years of Service" },
-              { number: "50+", label: "Buses in Fleet" },
-              { number: "10000+", label: "Happy Customers" },
-              { number: "24/7", label: "Customer Support" },
+              { number: get("stat_years"), label: "Years of Service" },
+              { number: get("stat_buses"), label: "Buses in Fleet" },
+              { number: get("stat_customers"), label: "Happy Customers" },
+              { number: get("stat_support"), label: "Customer Support" },
             ].map((stat, index) => (
               <div key={index} className="p-6">
                 <div className="text-5xl font-bold text-yellow-400 mb-2">

@@ -1,13 +1,10 @@
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Phone, Mail } from "lucide-react";
 
 export default function BookingConfirmation() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
+    <div className="flex-1">
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-16">
@@ -219,8 +216,6 @@ export default function BookingConfirmation() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

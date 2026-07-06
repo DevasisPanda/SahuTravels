@@ -1,12 +1,10 @@
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
+import { COOKIE_NAME } from "../../shared/const";
 import { getSessionCookieOptions } from "./cookies";
 import { hashPassword, verifyPassword, generateSessionToken, getSessionExpiry, isValidEmail, isValidPassword } from "./auth-utils";
 
-const COOKIE_NAME = "auth_session";
-
 export function registerCustomAuthRoutes(app: Express) {
-  const COOKIE_NAME = "auth_session";
   // User Registration
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
@@ -48,7 +46,7 @@ export function registerCustomAuthRoutes(app: Express) {
         updatedAt: new Date(),
       });
 
-      res.status(201).json({ message: "User registered successfully", userId: (result as any).insertId });
+      res.status(201).json({ message: "User registered successfully", userId: result.insertId });
     } catch (error) {
       console.error("[Auth] Registration failed:", error);
       res.status(500).json({ error: "Registration failed" });

@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const { get } = useSiteSettings();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -58,11 +60,6 @@ export default function Login() {
         <div className="bg-black border-2 border-yellow-400 rounded-2xl p-8 md:p-12 shadow-2xl">
           {/* Logo Section */}
           <div className="text-center mb-8">
-            <img
-              src="/manus-storage/IMG-20260508-WA0002_2f49e867.jpg"
-              alt="Sahu Travels Logo"
-              className="h-20 w-auto object-contain mx-auto mb-6"
-            />
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
               Sign <span className="text-yellow-400">In</span>
             </h1>

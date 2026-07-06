@@ -1,11 +1,45 @@
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Shield, Users, Zap, Award, CheckCircle } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+
+const defaultMilestones = [
+  {
+    year: "1989",
+    title: "Founded in Kota",
+    description: "Sahu Travels was established in Kota, Rajasthan with a single bus and a vision to provide comfortable travel.",
+  },
+  {
+    year: "1995",
+    title: "Expansion Begins",
+    description: "Expanded fleet to 5 buses and started operating routes to major pilgrimage centers.",
+  },
+  {
+    year: "2005",
+    title: "Modern Fleet",
+    description: "Invested in modern AC buses with latest amenities and safety features.",
+  },
+  {
+    year: "2015",
+    title: "Digital Era",
+    description: "Launched online booking system and mobile app for customer convenience.",
+  },
+  {
+    year: "2024",
+    title: "35+ Modern Buses",
+    description: "Today, we operate 35+ modern buses serving 2000+ satisfied customers annually.",
+  },
+];
 
 export default function About() {
+  const { get } = useSiteSettings();
+  const milestonesQuery = trpc.milestones.list.useQuery();
+
+  const timelineData = milestonesQuery.data && milestonesQuery.data.length > 0
+    ? milestonesQuery.data
+    : defaultMilestones;
+
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <Navigation />
+    <div className="bg-white">
 
       {/* Hero Section with Pattern */}
       <section className="relative bg-black text-white py-20 overflow-hidden">
@@ -24,11 +58,11 @@ export default function About() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
             <h1 className="text-6xl md:text-7xl font-bold mb-6">
-              About <span className="text-yellow-400">Sahu Travels</span>
+              About <span className="text-yellow-400">{get("company_name")}</span>
             </h1>
             <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-white mb-6"></div>
             <p className="text-xl text-gray-300">
-              Delivering excellence in bus travel since 1989. Your trusted partner for comfortable, safe, and reliable journeys across Rajasthan and beyond.
+              Delivering excellence in bus travel since {get("established_year")}. {get("company_description")}
             </p>
           </div>
         </div>
@@ -44,33 +78,7 @@ export default function About() {
           </h2>
 
           <div className="space-y-12 max-w-3xl">
-            {[
-              {
-                year: "1989",
-                title: "Founded in Kota",
-                desc: "Sahu Travels was established in Kota, Rajasthan with a single bus and a vision to provide comfortable travel.",
-              },
-              {
-                year: "1995",
-                title: "Expansion Begins",
-                desc: "Expanded fleet to 5 buses and started operating routes to major pilgrimage centers.",
-              },
-              {
-                year: "2005",
-                title: "Modern Fleet",
-                desc: "Invested in modern AC buses with latest amenities and safety features.",
-              },
-              {
-                year: "2015",
-                title: "Digital Era",
-                desc: "Launched online booking system and mobile app for customer convenience.",
-              },
-              {
-                year: "2024",
-                title: "35+ Modern Buses",
-                desc: "Today, we operate 35+ modern buses serving 2000+ satisfied customers annually.",
-              },
-            ].map((milestone, idx) => (
+            {timelineData.map((milestone, idx) => (
               <div key={idx} className="flex gap-8 items-start group">
                 <div className="relative">
                   <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-black group-hover:scale-125 transition">
@@ -80,7 +88,7 @@ export default function About() {
                 <div className="bg-white border-2 border-yellow-400 p-6 rounded-lg flex-1 hover:shadow-lg transition">
                   <div className="text-sm font-bold text-yellow-400 mb-2">{milestone.year}</div>
                   <h3 className="text-2xl font-bold text-black mb-2">{milestone.title}</h3>
-                  <p className="text-gray-700">{milestone.desc}</p>
+                  <p className="text-gray-700">{milestone.description || (milestone as any).desc}</p>
                 </div>
               </div>
             ))}
@@ -100,7 +108,7 @@ export default function About() {
               <div className="text-5xl mb-4">🎯</div>
               <h3 className="text-3xl font-bold text-yellow-400 mb-4">Our Mission</h3>
               <p className="text-gray-300 text-lg leading-relaxed">
-                To provide affordable, comfortable, and safe bus travel services that exceed customer expectations. We are committed to delivering premium travel experiences with professional service, modern buses, and exceptional customer care.
+                {get("mission_text")}
               </p>
             </div>
 
@@ -109,7 +117,7 @@ export default function About() {
               <div className="text-5xl mb-4">🚀</div>
               <h3 className="text-3xl font-bold text-black mb-4">Our Vision</h3>
               <p className="text-gray-800 text-lg leading-relaxed">
-                To become the most trusted and preferred bus travel company in India, known for reliability, comfort, and customer satisfaction. We aim to expand our services across all major cities while maintaining our commitment to quality and safety.
+                {get("vision_text")}
               </p>
             </div>
           </div>
@@ -258,10 +266,10 @@ export default function About() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { number: "35+", label: "Modern Buses" },
-              { number: "2000+", label: "Happy Clients" },
-              { number: "35", label: "Years Experience" },
-              { number: "1989", label: "Since Founded" },
+              { number: get("stat_buses"), label: "Modern Buses" },
+              { number: get("stat_customers"), label: "Happy Clients" },
+              { number: get("stat_years"), label: "Years Experience" },
+              { number: get("established_year"), label: "Since Founded" },
             ].map((stat, idx) => (
               <div key={idx} className="group">
                 <div className="text-5xl md:text-6xl font-bold text-yellow-400 group-hover:scale-110 transition">
@@ -274,7 +282,6 @@ export default function About() {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 }

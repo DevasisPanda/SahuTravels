@@ -4,11 +4,13 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function Navigation() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { get } = useSiteSettings();
 
   const isActive = (path: string) => location === path;
 
@@ -23,24 +25,18 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="bg-gradient-to-r from-black via-gray-900 to-black border-b-4 border-yellow-400 sticky top-0 z-50 shadow-lg shadow-yellow-400/20">
+    <nav className="bg-gradient-to-r from-black via-gray-900 to-black border-b-4 border-yellow-400 shadow-lg shadow-yellow-400/20">
       {/* Header Banner */}
       <div className="bg-yellow-400 text-black py-2 text-center font-bold text-sm md:text-base">
-        🚌 Welcome to Sahu Travels - Your Fantasy, Our Mission 🚌
+        {get("nav_banner_text")}
       </div>
 
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo */}
         <Link href="/">
           <div className="flex items-center gap-2 group hover:scale-105 transition cursor-pointer">
-            <img
-              src="/manus-storage/IMG-20260508-WA0002_2f49e867.jpg"
-              alt="Sahu Travels Logo"
-              className="h-20 w-auto object-contain group-hover:drop-shadow-lg group-hover:drop-shadow-yellow-400/50 transition"
-            />
-            <div className="hidden sm:block">
-              <div className="text-yellow-400 font-bold text-lg">SAHU TRAVELS</div>
-              <div className="text-gray-400 text-xs">Est. 1989 | Kota, Rajasthan</div>
+            <div>
+              <div className="text-yellow-400 font-bold text-xl tracking-wider">{get("company_name")}</div>
+              <div className="text-gray-400 text-xs">Est. {get("established_year")} | {get("address_city").split(",")[0] || "Kota"}, Rajasthan</div>
             </div>
           </div>
         </Link>

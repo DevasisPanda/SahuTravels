@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Lock, AlertCircle, ArrowRight, Mail } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function AdminLogin() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
+  const utils = trpc.useUtils();
+  const { get } = useSiteSettings();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loginMutation = trpc.auth.adminLogin.useMutation({
-    onSuccess: () => {
-      // Refresh auth state and redirect
-      window.location.href = "/admin";
+    onSuccess: (data) => {
+      utils.auth.me.setData(undefined, data.user);
+      setLocation("/admin");
     },
     onError: (error) => {
       setError(error.message || "Login failed. Please check your credentials.");
@@ -56,12 +59,12 @@ export default function AdminLogin() {
             <p className="text-gray-400 mb-6">
               Your account does not have admin privileges. Please contact the administrator.
             </p>
-            <a
+            <Link
               href="/"
               className="inline-block px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-bold rounded-lg transition"
             >
               Return to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -105,11 +108,6 @@ export default function AdminLogin() {
         <div className="bg-black border-2 border-yellow-400 rounded-2xl p-8 md:p-12 shadow-2xl">
           {/* Logo Section */}
           <div className="text-center mb-8">
-            <img
-              src="/manus-storage/IMG-20260508-WA0002_2f49e867.jpg"
-              alt="Sahu Travels Logo"
-              className="h-20 w-auto object-contain mx-auto mb-6"
-            />
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
               Admin <span className="text-yellow-400">Portal</span>
             </h1>

@@ -1,83 +1,116 @@
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { CheckCircle, Wifi, Music, Zap, Camera, Gauge } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+
+const fallbackBuses = [
+  {
+    name: "2x2 AC Premium",
+    type: "2x2",
+    seats: 42,
+    class: "Premium",
+    isAC: true,
+    amenities: [
+      "Air Conditioned",
+      "Push-Back Seats",
+      "LED Lights",
+      "Music System",
+      "Charging Points",
+      "WiFi",
+      "CCTV",
+      "GPS Tracking",
+    ],
+    color: "from-blue-500 to-blue-600",
+    imageUrl: "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=600&h=400&fit=crop",
+  },
+  {
+    name: "3x2 AC Extra Premium",
+    type: "3x2",
+    seats: 56,
+    class: "Extra Premium",
+    isAC: true,
+    amenities: [
+      "Air Conditioned (Cool & Heater)",
+      "Push-Back Seats With Comfort",
+      "LED Lights",
+      "JBL Music System",
+      "Charging Points",
+      "WiFi",
+      "CCTV",
+      "GPS Tracking",
+    ],
+    color: "from-purple-500 to-purple-600",
+    imageUrl: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&h=400&fit=crop",
+  },
+  {
+    name: "2x2 Non-AC Deluxe",
+    type: "2x2",
+    seats: 32,
+    class: "Deluxe",
+    isAC: false,
+    amenities: [
+      "Comfortable Seats",
+      "Music System",
+      "Charging Points",
+      "Reading Lights",
+      "CCTV",
+      "GPS Tracking",
+    ],
+    color: "from-green-500 to-green-600",
+    imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop",
+  },
+  {
+    name: "3x2 AC Deluxe",
+    type: "3x2",
+    seats: 56,
+    class: "Deluxe",
+    isAC: true,
+    amenities: [
+      "Air Conditioned",
+      "Push-Back Seats",
+      "Music System",
+      "Charging Points",
+      "LED Lights",
+      "CCTV",
+      "GPS Tracking",
+    ],
+    color: "from-orange-500 to-orange-600",
+    imageUrl: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=600&h=400&fit=crop",
+  },
+];
 
 export default function Fleet() {
-  const buses = [
-    {
-      name: "2x2 AC Premium",
-      type: "2x2",
-      seats: 42,
-      class: "Premium",
-      isAC: true,
-      amenities: [
-        "Air Conditioned",
-        "Push-Back Seats",
-        "LED Lights",
-        "Music System",
-        "Charging Points",
-        "WiFi",
-        "CCTV",
-        "GPS Tracking",
-      ],
-      color: "from-blue-500 to-blue-600",
-    },
-    {
-      name: "3x2 AC Extra Premium",
-      type: "3x2",
-      seats: 56,
-      class: "Extra Premium",
-      isAC: true,
-      amenities: [
-        "Air Conditioned (Cool & Heater)",
-        "Push-Back Seats With Comfort",
-        "LED Lights",
-        "JBL Music System",
-        "Charging Points",
-        "WiFi",
-        "CCTV",
-        "GPS Tracking",
-      ],
-      color: "from-purple-500 to-purple-600",
-    },
-    {
-      name: "2x2 Non-AC Deluxe",
-      type: "2x2",
-      seats: 32,
-      class: "Deluxe",
-      isAC: false,
-      amenities: [
-        "Comfortable Seats",
-        "Music System",
-        "Charging Points",
-        "Reading Lights",
-        "CCTV",
-        "GPS Tracking",
-      ],
-      color: "from-green-500 to-green-600",
-    },
-    {
-      name: "3x2 AC Deluxe",
-      type: "3x2",
-      seats: 56,
-      class: "Deluxe",
-      isAC: true,
-      amenities: [
-        "Air Conditioned",
-        "Push-Back Seats",
-        "Music System",
-        "Charging Points",
-        "LED Lights",
-        "CCTV",
-        "GPS Tracking",
-      ],
-      color: "from-orange-500 to-orange-600",
-    },
+  const query = trpc.fleet.list.useQuery();
+
+  const colors = [
+    "from-blue-500 to-blue-600",
+    "from-purple-500 to-purple-600",
+    "from-green-500 to-green-600",
+    "from-orange-500 to-orange-600",
+    "from-red-500 to-red-600",
+    "from-teal-500 to-teal-600",
   ];
 
+  const buses = query.data && query.data.length > 0
+    ? query.data.map((bus, idx) => {
+        let parsed = [];
+        try {
+          parsed = JSON.parse(bus.amenities);
+        } catch {}
+        return {
+          id: bus.id,
+          name: bus.name,
+          type: bus.type,
+          seats: bus.seats,
+          class: bus.class,
+          isAC: bus.isAC === 1,
+          amenities: parsed,
+          color: colors[idx % colors.length],
+          imageUrl: bus.imageUrl || "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=600&h=400&fit=crop",
+        };
+      })
+    : fallbackBuses;
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
+    <div>
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-black to-gray-900 text-white py-16">
@@ -101,12 +134,7 @@ export default function Fleet() {
                 {/* Image */}
                 <div className="h-48 overflow-hidden bg-gray-200">
                   <img
-                    src={[
-                      "/manus-storage/0V6aVifkFqEW_5fe9ef75.jpg",
-                      "/manus-storage/9dlR4M3yk2Dw_6dd58858.jpg",
-                      "/manus-storage/G3h9PCbfukVk_0894e0ce.jpg",
-                      "/manus-storage/R3banLBSpJmM_20b614e7.jpg",
-                    ][idx]}
+                    src={bus.imageUrl}
                     alt={bus.name}
                     className="w-full h-full object-cover"
                   />
@@ -141,7 +169,7 @@ export default function Fleet() {
                       Amenities:
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
-                      {bus.amenities.map((amenity, i) => (
+                      {bus.amenities.map((amenity: string, i: number) => (
                         <div key={i} className="flex items-start gap-2">
                           <CheckCircle
                             size={18}
@@ -271,8 +299,6 @@ export default function Fleet() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

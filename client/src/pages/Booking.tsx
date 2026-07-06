@@ -1,29 +1,28 @@
 import { useState } from "react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import BookingForm from "@/components/BookingForm";
 import FeedbackForm from "@/components/FeedbackForm";
 import { trpc } from "@/lib/trpc";
 import { Star } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function Booking() {
   const [bookingTab, setBookingTab] = useState<"booking" | "feedback">(
     "booking"
   );
+  const { get } = useSiteSettings();
 
   // Fetch feedback
   const { data: feedbackList } = trpc.feedback.list.useQuery();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
+    <div className="flex-1">
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-black to-gray-900 text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold">Book Your Journey</h1>
           <p className="text-gray-300 mt-2">
-            Get 20% discount on online bookings
+            Get {get("discount_percent")}% discount on online bookings
           </p>
         </div>
       </section>
@@ -123,8 +122,6 @@ export default function Booking() {
           </div>
         </section>
       )}
-
-      <Footer />
     </div>
   );
 }

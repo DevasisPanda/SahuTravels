@@ -1,5 +1,3 @@
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 
@@ -12,48 +10,48 @@ export default function Gallery() {
     {
       title: "Luxury AC Bus Interior",
       category: "AC Interior",
-      image: "/manus-storage/0V6aVifkFqEW_5fe9ef75.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=600&h=400&fit=crop",
     },
     {
       title: "Premium AC Bus Seating",
       category: "AC Interior",
-      image: "/manus-storage/9dlR4M3yk2Dw_6dd58858.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&h=400&fit=crop",
     },
     {
       title: "AC Bus Comfort Features",
       category: "AC Interior",
-      image: "/manus-storage/R3banLBSpJmM_20b614e7.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=600&h=400&fit=crop",
     },
     {
       title: "Modern Coach Bus Exterior",
       category: "AC Exterior",
-      image: "/manus-storage/6im2H7aQdFhM_4541cc7f.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop",
     },
     {
       title: "Non-AC Bus Interior",
       category: "Non-AC Interior",
-      image: "/manus-storage/G3h9PCbfukVk_0894e0ce.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1468817814171-2e4edd3a2c01?w=600&h=400&fit=crop",
     },
     {
       title: "Non-AC Bus Seating",
       category: "Non-AC Interior",
-      image: "/manus-storage/toJUwHBUYSZA_ccd7dbf5.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop",
     },
     {
       title: "Comfortable Non-AC Interior",
       category: "Non-AC Interior",
-      image: "/manus-storage/tqdRMwuc590A_49561119.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=600&h=400&fit=crop",
     },
     {
       title: "Premium Bus Features",
       category: "Other",
-      image: "/manus-storage/0V6aVifkFqEW_5fe9ef75.jpg",
+      imageUrl: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&h=400&fit=crop",
     },
   ];
 
-  // Combine uploaded photos with default items
+  // Rely on uploaded photos if available, otherwise use defaults
   const allPhotos = galleryQuery.data && galleryQuery.data.length > 0 
-    ? [...galleryQuery.data, ...defaultGalleryItems]
+    ? galleryQuery.data
     : defaultGalleryItems;
 
   const categories = ["All", "AC Interior", "AC Exterior", "Non-AC Interior", "Non-AC Exterior", "Other"];
@@ -63,8 +61,7 @@ export default function Gallery() {
     : allPhotos.filter((item: any) => item.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navigation />
+    <div className="bg-black text-white">
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-black via-yellow-900 to-black py-16">
@@ -105,7 +102,7 @@ export default function Gallery() {
                   className="group relative overflow-hidden rounded-lg border-2 border-yellow-400 hover:border-yellow-300 transition"
                 >
                   <img
-                    src={item.image || item.imageUrl}
+                    src={item.imageUrl}
                     alt={item.title}
                     className="w-full h-64 object-cover group-hover:scale-110 transition duration-300"
                   />
@@ -134,8 +131,6 @@ export default function Gallery() {
           )}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
