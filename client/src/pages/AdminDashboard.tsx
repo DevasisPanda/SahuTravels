@@ -15,12 +15,12 @@ import OffersTab from "@/components/admin/OffersTab";
 import FleetTab from "@/components/admin/FleetTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
 
-type TabType = "bookings" | "media" | "content" | "feedback" | "settings";
+type TabType = "media" | "content" | "feedback" | "settings";
 
 export default function AdminDashboard() {
   const { user, loading, logout } = useAuth();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<TabType>("bookings");
+  const [activeTab, setActiveTab] = useState<TabType>("media");
   const [activeMediaSubTab, setActiveMediaSubTab] = useState<"banners" | "gallery">("banners");
   const [activeContentSubTab, setActiveContentSubTab] = useState<"services" | "milestones" | "offers" | "fleet">("services");
 
@@ -48,7 +48,6 @@ export default function AdminDashboard() {
   };
 
   const tabs = [
-    { id: "bookings" as const, label: "Bookings", icon: <BookOpen size={20} /> },
     { id: "media" as const, label: "Media CMS", icon: <ImageIcon size={20} /> },
     { id: "content" as const, label: "Content CMS", icon: <MapPin size={20} /> },
     { id: "feedback" as const, label: "Feedback & Survey", icon: <MessageSquare size={20} /> },
@@ -170,7 +169,6 @@ export default function AdminDashboard() {
         )}
 
         {/* Render Tabs */}
-        {activeTab === "bookings" && <BookingsTab />}
         {activeTab === "media" && activeMediaSubTab === "banners" && <BannersTab />}
         {activeTab === "media" && activeMediaSubTab === "gallery" && <GalleryTab />}
         {activeTab === "content" && activeContentSubTab === "services" && <ServicesTab />}

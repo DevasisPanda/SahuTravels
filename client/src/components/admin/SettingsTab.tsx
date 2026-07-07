@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Save, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { ImageUploadInput } from "./ImageUploadInput";
 
 export default function SettingsTab() {
   const settingsQuery = trpc.settings.list.useQuery();
@@ -129,24 +130,41 @@ export default function SettingsTab() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {matchingSettings.map((setting: any) => {
                 const isTextArea = setting.key.includes("description") || setting.key.includes("text") || setting.key.includes("embed");
+                const isImage = setting.key === "logo_url";
+                
                 return (
-                  <div key={setting.key} className={isTextArea ? "md:col-span-2" : ""}>
-                    <label className="block text-gray-400 text-sm font-semibold mb-1">
-                      {setting.label} <span className="text-gray-600 text-xs">({setting.key})</span>
-                    </label>
-                    {isTextArea ? (
-                      <textarea
+                  <div key={setting.key} className={isTextArea || isImage ? "md:col-span-2" : ""}>
+                    {isImage ? (
+                      <ImageUploadInput
+                        id={setting.key}
                         value={formValues[setting.key] ?? ""}
-                        onChange={(e) => handleInputChange(setting.key, e.target.value)}
-                        className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400 h-24"
+                        onChange={(url) => handleInputChange(setting.key, url)}
+                        label={`${setting.label} (${setting.key})`}
+                        placeholder="https://example.com/logo.png"
                       />
+                    ) : isTextArea ? (
+                      <>
+                        <label className="block text-gray-400 text-sm font-semibold mb-1">
+                          {setting.label} <span className="text-gray-600 text-xs">({setting.key})</span>
+                        </label>
+                        <textarea
+                          value={formValues[setting.key] ?? ""}
+                          onChange={(e) => handleInputChange(setting.key, e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400 h-24"
+                        />
+                      </>
                     ) : (
-                      <input
-                        type="text"
-                        value={formValues[setting.key] ?? ""}
-                        onChange={(e) => handleInputChange(setting.key, e.target.value)}
-                        className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400"
-                      />
+                      <>
+                        <label className="block text-gray-400 text-sm font-semibold mb-1">
+                          {setting.label} <span className="text-gray-600 text-xs">({setting.key})</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={formValues[setting.key] ?? ""}
+                          onChange={(e) => handleInputChange(setting.key, e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400"
+                        />
+                      </>
                     )}
                   </div>
                 );

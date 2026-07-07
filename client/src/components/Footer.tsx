@@ -13,9 +13,18 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h4 className="text-2xl font-black text-yellow-400 mb-3 tracking-wider">
-              {get("company_name")}
-            </h4>
+            <div className="flex items-center gap-3 mb-4">
+              {get("logo_url") && (
+                <img
+                  src={get("logo_url")}
+                  alt="Sahu Travels Logo"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-yellow-400 shadow-md"
+                />
+              )}
+              <h4 className="text-2xl font-black text-yellow-400 tracking-wider">
+                {get("company_name")}
+              </h4>
+            </div>
             <p className="text-gray-300 mb-4">
               {get("company_description")}
             </p>
@@ -35,12 +44,18 @@ export default function Footer() {
                 { href: "/about", label: "About Us" },
                 { href: "/services", label: "Services" },
                 { href: "/fleet", label: "Our Fleet" },
-                { href: "/booking", label: "Book Now" },
+                { href: "https://www.sahubus.in/m/#/tabs/home", label: "Book Now", isExternal: true },
               ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-gray-300 hover:text-yellow-400 transition">
-                    {link.label}
-                  </Link>
+                <li key={link.label}>
+                  {link.isExternal ? (
+                    <a href={link.href} className="text-gray-300 hover:text-yellow-400 transition">
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="text-gray-300 hover:text-yellow-400 transition">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

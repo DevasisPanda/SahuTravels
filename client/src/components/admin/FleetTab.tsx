@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Edit2, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { ImageUploadInput } from "./ImageUploadInput";
 
 export default function FleetTab() {
   const fleetQuery = trpc.fleet.list.useQuery();
@@ -108,8 +109,13 @@ export default function FleetTab() {
             <input id="fleet-seats" type="number" value={seats} onChange={(e) => setSeats(Number(e.target.value) || 0)} className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400" />
           </div>
           <div className="md:col-span-2">
-            <label htmlFor="fleet-imageUrl" className="block text-gray-400 font-bold mb-1">Image URL</label>
-            <input id="fleet-imageUrl" type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/bus.jpg" className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400" />
+            <ImageUploadInput
+              id="fleet-imageUrl"
+              value={imageUrl}
+              onChange={setImageUrl}
+              label="Bus Image"
+              placeholder="https://example.com/bus.jpg"
+            />
           </div>
           <div className="md:col-span-4">
             <label htmlFor="fleet-amenities" className="block text-gray-400 font-bold mb-1">Amenities</label>

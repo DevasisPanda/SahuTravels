@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, Trash2, Plus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { ImageUploadInput } from "./ImageUploadInput";
 
 export default function BannersTab() {
   const [bannerTitle, setBannerTitle] = useState("");
@@ -94,16 +95,12 @@ export default function BannersTab() {
           </div>
 
           <div>
-            <label htmlFor="banner-imageUrl" className="block text-yellow-400 font-bold mb-2">
-              Image URL *
-            </label>
-            <input
+            <ImageUploadInput
               id="banner-imageUrl"
-              type="url"
               value={bannerImageUrl}
-              onChange={(e) => setBannerImageUrl(e.target.value)}
+              onChange={setBannerImageUrl}
+              label="Image *"
               placeholder="https://example.com/banner.jpg"
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400"
             />
           </div>
 

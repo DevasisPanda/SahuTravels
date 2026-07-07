@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, Trash2, Plus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { ImageUploadInput } from "./ImageUploadInput";
 
 const GALLERY_CATEGORIES = ["AC Interior", "AC Exterior", "Non-AC Interior", "Non-AC Exterior", "Other"] as const;
 
@@ -85,14 +86,12 @@ export default function GalleryTab() {
             />
           </div>
           <div>
-            <label htmlFor="gallery-imageUrl" className="block text-yellow-400 font-bold mb-2">Image URL *</label>
-            <input
+            <ImageUploadInput
               id="gallery-imageUrl"
-              type="url"
               value={galleryImageUrl}
-              onChange={(e) => setGalleryImageUrl(e.target.value)}
+              onChange={setGalleryImageUrl}
+              label="Image *"
               placeholder="https://example.com/photo.jpg"
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-yellow-400"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">

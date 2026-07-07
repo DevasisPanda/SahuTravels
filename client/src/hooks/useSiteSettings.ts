@@ -12,7 +12,7 @@ const fallbackSettings: Record<string, string> = {
   google_maps_embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3560.523456789!2d75.8245!3d25.2048!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396db6f5c5c5c5c5%3A0x5c5c5c5c5c5c5c5c!2sShop%20No.%20151%2C%20Balaji%20Market%2C%20Sector%20A%2C%20Shrinath%20Puram%2C%20Kota%2C%20Rajasthan%20324005!5e0!3m2!1sen!2sin!4v1234567890",
   google_maps_link: "https://share.google.com/pNfl99BAweudsdMJf",
   tagline: "Your Fantasy - Our Mission",
-  logo_url: "https://via.placeholder.com/400x100/FFD700/000000?text=SAHU+TRAVELS",
+  logo_url: "/logo.jpg",
   company_name: "SAHU TRAVELS",
   established_year: "1989",
   company_description: "Your trusted travel partner since 1989, providing comfortable and reliable bus travel services across Rajasthan and beyond.",

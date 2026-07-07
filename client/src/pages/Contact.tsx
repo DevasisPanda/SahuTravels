@@ -5,6 +5,21 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 export default function Contact() {
   const { get } = useSiteSettings();
 
+  const rawEmbedUrl = get("google_maps_embed");
+  const safeEmbedUrl = (rawEmbedUrl.startsWith("https://www.google.com/maps/embed") || rawEmbedUrl.startsWith("https://www.google.com/maps/d/embed"))
+    ? rawEmbedUrl
+    : "about:blank";
+
+  const validateUrl = (url: string): string => {
+    if (!url) return "";
+    if (url.startsWith("https://") || url.startsWith("http://")) return url;
+    return "";
+  };
+
+  const safeMapsLink = validateUrl(get("google_maps_link")) || "#";
+  const safeFacebookUrl = validateUrl(get("facebook_url"));
+  const safeInstagramUrl = validateUrl(get("instagram_url"));
+
   return (
     <div>
 
@@ -84,7 +99,8 @@ export default function Contact() {
           
           <div className="w-full h-96 bg-gray-300 rounded-lg shadow-lg overflow-hidden border-4 border-yellow-400 mb-8">
             <iframe
-              src={get("google_maps_embed")}
+              src={safeEmbedUrl}
+              sandbox="allow-scripts allow-same-origin allow-popups"
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -97,7 +113,7 @@ export default function Contact() {
           {/* Google Maps Link */}
           <div className="text-center">
             <a
-              href={get("google_maps_link")}
+              href={safeMapsLink}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded-lg transition transform hover:scale-105 shadow-lg"
@@ -156,9 +172,9 @@ export default function Contact() {
               <h2 className="text-3xl font-bold mb-8 text-white">Quick Links</h2>
               
               <div className="space-y-4">
-                <Link href="/booking" className="block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition text-center">
+                <a href="https://www.sahubus.in/m/#/tabs/home" className="block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition text-center">
                   Book a Bus
-                </Link>
+                </a>
                 <Link href="/services" className="block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition text-center">
                   Our Services
                 </Link>
@@ -176,13 +192,13 @@ export default function Contact() {
                   Connect with us on social media for updates and special offers.
                 </p>
                 <div className="flex gap-4">
-                  {get("facebook_url") && (
-                    <a href={get("facebook_url")} target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:text-yellow-300 font-semibold">
+                  {safeFacebookUrl && (
+                    <a href={safeFacebookUrl} target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:text-yellow-300 font-semibold">
                       Facebook
                     </a>
                   )}
-                  {get("instagram_url") && (
-                    <a href={get("instagram_url")} target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:text-yellow-300 font-semibold">
+                  {safeInstagramUrl && (
+                    <a href={safeInstagramUrl} target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:text-yellow-300 font-semibold">
                       Instagram
                     </a>
                   )}

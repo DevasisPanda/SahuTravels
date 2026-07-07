@@ -1,12 +1,22 @@
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
-// Simple password hashing (in production, use bcrypt)
+// Password hashing using bcrypt (cost factor 12) with legacy SHA-256 fallback
 export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  return bcrypt.hashSync(password, 12);
 }
 
 export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+  if (hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$')) {
+    try {
+      return bcrypt.compareSync(password, hash);
+    } catch (e) {
+      return false;
+    }
+  }
+  // Fallback for legacy SHA-256 hashes
+  const legacyHash = crypto.createHash('sha256').update(password).digest('hex');
+  return legacyHash === hash;
 }
 
 // Generate secure session token

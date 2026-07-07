@@ -89,11 +89,11 @@ export default function Offers() {
             <p className="text-lg text-gray-700 mb-8">
               {discountDesc}
             </p>
-            <Link href="/booking">
+            <a href="https://www.sahubus.in/m/#/tabs/home">
               <Button className="bg-black hover:bg-gray-900 text-white text-lg px-8 py-6">
                 Book Now - Get {discountPercent}% Off
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -181,11 +181,11 @@ export default function Offers() {
             Book your journey online today and enjoy {discountPercent}% discount on your bus fare. 
             Limited time offer - book now!
           </p>
-          <Link href="/booking">
+          <a href="https://www.sahubus.in/m/#/tabs/home">
             <Button className="bg-black hover:bg-gray-900 text-white text-lg px-8 py-6">
               Book Your Ticket Now
             </Button>
-          </Link>
+          </a>
         </div>
       </section>
     </div>

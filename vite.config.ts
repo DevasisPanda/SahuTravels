@@ -6,7 +6,23 @@ import { defineConfig } from "vite";
 
 const PROJECT_ROOT = import.meta.dirname;
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin()];
+const analyticsPlugin = {
+  name: "analytics-plugin",
+  transformIndexHtml(html: string) {
+    const endpoint = process.env.VITE_ANALYTICS_ENDPOINT;
+    const websiteId = process.env.VITE_ANALYTICS_WEBSITE_ID;
+    
+    if (!endpoint || !websiteId || endpoint.includes("%") || websiteId.includes("%")) {
+      return html.replace(/<script[^>]*src="%VITE_ANALYTICS_ENDPOINT%[\s\S]*?<\/script>/gi, "");
+    }
+    
+    return html
+      .replace(/%VITE_ANALYTICS_ENDPOINT%/g, endpoint)
+      .replace(/%VITE_ANALYTICS_WEBSITE_ID%/g, websiteId);
+  }
+};
+
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), analyticsPlugin];
 
 export default defineConfig({
   plugins,

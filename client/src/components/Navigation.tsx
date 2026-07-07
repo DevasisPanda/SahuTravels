@@ -33,10 +33,17 @@ export default function Navigation() {
 
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/">
-          <div className="flex items-center gap-2 group hover:scale-105 transition cursor-pointer">
+          <div className="flex items-center gap-3 group hover:scale-105 transition cursor-pointer">
+            {get("logo_url") && (
+              <img
+                src={get("logo_url")}
+                alt="Sahu Travels Logo"
+                className="w-12 h-12 rounded-full object-cover border-2 border-yellow-400 shadow-md"
+              />
+            )}
             <div>
-              <div className="text-yellow-400 font-bold text-xl tracking-wider">{get("company_name")}</div>
-              <div className="text-gray-400 text-xs">Est. {get("established_year")} | {get("address_city").split(",")[0] || "Kota"}, Rajasthan</div>
+              <div className="text-yellow-400 font-bold text-xl tracking-wider uppercase">{get("company_name")}</div>
+              <div className="text-gray-400 text-[10px] md:text-xs">Est. {get("established_year")} | {get("address_city").split(",")[0] || "Kota"}, Rajasthan</div>
             </div>
           </div>
         </Link>
@@ -77,11 +84,11 @@ export default function Navigation() {
             </Link>
           )}
 
-          <Link href="/booking">
+          <a href="https://www.sahubus.in/m/#/tabs/home">
             <Button className="hidden md:flex bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold shadow-lg shadow-yellow-400/50 transition transform hover:scale-105">
               ✈️ Book Now
             </Button>
-          </Link>
+          </a>
 
           {/* Mobile Menu Button */}
           <button
@@ -142,14 +149,14 @@ export default function Navigation() {
               </Link>
             )}
 
-            <Link href="/booking">
+            <a href="https://www.sahubus.in/m/#/tabs/home">
               <Button
                 className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-3"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 ✈️ Book Now
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       )}

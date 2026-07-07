@@ -1,5 +1,6 @@
-import { eq, count } from "drizzle-orm";
+import { eq, count, lt, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
 import { hashPassword } from "./_core/auth-utils";
 import {
   InsertUser,
@@ -33,13 +34,51 @@ function getInsertId(result: unknown): number {
 }
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let dbOfflineUntil = 0;
+
+export function markDbOffline() {
+  dbOfflineUntil = Date.now() + 30000; // Skip DB connection/queries for 30 seconds
+}
+
+export function isDbOffline(): boolean {
+  return Date.now() < dbOfflineUntil;
+}
+
+function cleanDatabaseUrl(urlStr: string): { cleanedUrl: string; ssl?: any } {
+  try {
+    const url = new URL(urlStr);
+    const sslMode = url.searchParams.get("ssl-mode");
+    if (sslMode) {
+      url.searchParams.delete("ssl-mode");
+      return {
+        cleanedUrl: url.toString(),
+        ssl: { rejectUnauthorized: false }
+      };
+    }
+    return { cleanedUrl: urlStr };
+  } catch {
+    return { cleanedUrl: urlStr };
+  }
+}
 
 export async function getDb() {
+  if (isDbOffline()) {
+    return null;
+  }
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
-    } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      const { cleanedUrl, ssl } = cleanDatabaseUrl(process.env.DATABASE_URL);
+      const connectionOptions: any = {
+        uri: cleanedUrl,
+      };
+      if (ssl) {
+        connectionOptions.ssl = ssl;
+      }
+      const pool = mysql.createPool(connectionOptions);
+      _db = drizzle(pool as any);
+    } catch (error: any) {
+      console.warn("[Database] Failed to connect:", error.message || error);
+      markDbOffline();
       _db = null;
     }
   }
@@ -76,33 +115,80 @@ export async function createSession(session: InsertSession) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
+  // Auto cleanup expired sessions on new session creation
+  await cleanupExpiredSessions().catch(err => console.error("[Session Cleanup Error]", err));
+
   const result = await db.insert(sessions).values(session);
   return result;
 }
 
 export async function getSessionByToken(token: string) {
+  if (isDbOffline()) return undefined;
   const db = await getDb();
   if (!db) return undefined;
   
-  const result = await db.select().from(sessions).where(eq(sessions.token, token)).limit(1);
-  if (result.length === 0) return undefined;
-  
-  const session = result[0];
-  
-  // Check if session is expired
-  if (new Date() > session.expiresAt) {
-    await deleteSession(token);
+  // Auto cleanup expired sessions during lookup
+  await cleanupExpiredSessions().catch(() => {});
+
+  try {
+    const result = await db.select().from(sessions).where(eq(sessions.token, token)).limit(1);
+    if (result.length === 0) return undefined;
+    
+    const session = result[0];
+    
+    // Check if session is expired
+    if (new Date() > session.expiresAt) {
+      await deleteSession(token).catch(() => {});
+      return undefined;
+    }
+    
+    return session;
+  } catch (error: any) {
+    const errorMsg = error?.message || "";
+    const errorCode = error?.code || error?.cause?.code || "";
+    if (errorCode === "ENOTFOUND" || errorCode === "ECONNREFUSED" || errorMsg.includes("ENOTFOUND") || errorMsg.includes("connect")) {
+      markDbOffline();
+      console.warn("[Database Connection Warning] MySQL server is unreachable. Offline protection activated for 30s.");
+    } else {
+      console.error("[Get Session Error]", error);
+    }
     return undefined;
   }
-  
-  return session;
 }
 
 export async function deleteSession(token: string) {
+  if (isDbOffline()) return;
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
   await db.delete(sessions).where(eq(sessions.token, token));
+}
+
+export async function deleteSessionsByUserId(userId: number) {
+  if (isDbOffline()) return;
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(sessions).where(eq(sessions.userId, userId));
+}
+
+export async function cleanupExpiredSessions() {
+  if (isDbOffline()) return;
+  const db = await getDb();
+  if (!db) return;
+  
+  try {
+    await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
+  } catch (error: any) {
+    const errorMsg = error?.message || "";
+    const errorCode = error?.code || error?.cause?.code || "";
+    if (errorCode === "ENOTFOUND" || errorCode === "ECONNREFUSED" || errorMsg.includes("ENOTFOUND") || errorMsg.includes("connect")) {
+      markDbOffline();
+      console.warn("[Database Connection Warning] MySQL server is unreachable. Offline protection activated for 30s.");
+    } else {
+      throw error;
+    }
+  }
 }
 
 export async function updateUserLastSignedIn(userId: number) {
@@ -122,11 +208,18 @@ export async function createBooking(booking: InsertBusBooking): Promise<InsertRe
   return { insertId: getInsertId(result) };
 }
 
-export async function getBookings() {
+export async function getBookings(limit?: number, offset?: number) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(busBookings);
+  const query = db.select().from(busBookings);
+  if (limit !== undefined && offset !== undefined) {
+    return await query.limit(limit).offset(offset);
+  }
+  if (limit !== undefined) {
+    return await query.limit(limit);
+  }
+  return await query;
 }
 
 export async function updateBookingStatus(bookingId: number, status: string) {
@@ -238,6 +331,13 @@ export async function getGalleryPhotos() {
   return await db.select().from(galleryPhotos).where(eq(galleryPhotos.isActive, 1));
 }
 
+export async function getGalleryPhotosByCategory(category: "AC Interior" | "AC Exterior" | "Non-AC Interior" | "Non-AC Exterior" | "Other") {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(galleryPhotos).where(and(eq(galleryPhotos.category, category), eq(galleryPhotos.isActive, 1)));
+}
+
 export async function getAllGalleryPhotosForAdmin() {
   const db = await getDb();
   if (!db) return [];
@@ -286,8 +386,34 @@ export async function bulkUpdateSettings(updates: { key: string; value: string }
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  for (const update of updates) {
-    await db.update(siteSettings).set({ value: update.value }).where(eq(siteSettings.key, update.key));
+  await db.transaction(async (tx) => {
+    for (const update of updates) {
+      await tx.update(siteSettings).set({ value: update.value }).where(eq(siteSettings.key, update.key));
+    }
+  });
+}
+
+export async function getSettingByKey(key: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+  return result[0] || null;
+}
+
+export async function upsertSettingByKey(key: string, value: string, category = "system", label = "System Setting") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getSettingByKey(key);
+  if (existing) {
+    await db.update(siteSettings).set({ value }).where(eq(siteSettings.key, key));
+  } else {
+    await db.insert(siteSettings).values({
+      key,
+      value,
+      category,
+      label,
+    });
   }
 }
 
@@ -441,7 +567,11 @@ export async function seedDatabase() {
     const usersCount = await db.select({ count: count() }).from(users);
     if (usersCount[0].count === 0) {
       console.log("[Database] Seeding default admin user...");
-      const hashedPassword = hashPassword("admin123");
+      const adminPassword = process.env.ADMIN_INITIAL_PASSWORD || "admin123";
+      if (!process.env.ADMIN_INITIAL_PASSWORD) {
+        console.warn("[Database] WARNING: ADMIN_INITIAL_PASSWORD environment variable not set. Using default insecure password 'admin123'.");
+      }
+      const hashedPassword = hashPassword(adminPassword);
       await db.insert(users).values({
         email: "admin@sahutravel.com",
         password: hashedPassword,
@@ -452,7 +582,6 @@ export async function seedDatabase() {
         updatedAt: new Date(),
       });
     }
-
     // 1. Seed Site Settings
     const settingsCount = await db.select({ count: count() }).from(siteSettings);
     if (settingsCount[0].count === 0) {
@@ -469,7 +598,7 @@ export async function seedDatabase() {
         { key: "google_maps_embed", value: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3560.523456789!2d75.8245!3d25.2048!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396db6f5c5c5c5c5%3A0x5c5c5c5c5c5c5c5c!2sShop%20No.%20151%2C%20Balaji%20Market%2C%20Sector%20A%2C%20Shrinath%20Puram%2C%20Kota%2C%20Rajasthan%20324005!5e0!3m2!1sen!2sin!4v1234567890", category: "contact", label: "Google Maps Embed URL" },
         { key: "google_maps_link", value: "https://share.google.com/pNfl99BAweudsdMJf", category: "contact", label: "Google Maps Share Link" },
         { key: "tagline", value: "Your Fantasy - Our Mission", category: "branding", label: "Company Tagline" },
-        { key: "logo_url", value: "https://via.placeholder.com/400x100/FFD700/000000?text=SAHU+TRAVELS", category: "branding", label: "Company Logo URL" },
+        { key: "logo_url", value: "/logo.jpg", category: "branding", label: "Company Logo URL" },
         { key: "company_name", value: "SAHU TRAVELS", category: "branding", label: "Company Name" },
         { key: "established_year", value: "1989", category: "branding", label: "Established Year" },
         { key: "company_description", value: "Your trusted travel partner since 1989, providing comfortable and reliable bus travel services across Rajasthan and beyond.", category: "branding", label: "Company Description" },
@@ -728,7 +857,52 @@ export async function seedDatabase() {
       await db.insert(busFleet).values(defaultFleet);
     }
 
-    // 6. Seed Gallery Photos
+    // 6. Seed Home Banners
+    const bannersCount = await db.select({ count: count() }).from(homeBanners);
+    if (bannersCount[0].count === 0) {
+      console.log("[Database] Seeding default home banners...");
+      const defaultBanners = [
+        {
+          title: "Experience Luxury Travel",
+          description: "Premium bus services across Rajasthan and beyond",
+          imageUrl: "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=1200&h=600&fit=crop",
+          ctaText: "Book Now",
+          ctaLink: "https://www.sahubus.in/m/#/tabs/home",
+          isActive: 1,
+          displayOrder: 1,
+        },
+        {
+          title: "Comfort Redefined",
+          description: "AC and Non-AC buses with premium amenities",
+          imageUrl: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=1200&h=600&fit=crop",
+          ctaText: "View Fleet",
+          ctaLink: "/fleet",
+          isActive: 1,
+          displayOrder: 2,
+        },
+        {
+          title: "Your Fantasy - Our Mission",
+          description: "Making every journey memorable since 1989",
+          imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop",
+          ctaText: "Learn More",
+          ctaLink: "/about",
+          isActive: 1,
+          displayOrder: 3,
+        },
+        {
+          title: "Safe & Reliable",
+          description: "GPS tracking, CCTV, and emergency support",
+          imageUrl: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=1200&h=600&fit=crop",
+          ctaText: "Contact Us",
+          ctaLink: "/contact",
+          isActive: 1,
+          displayOrder: 4,
+        },
+      ];
+      await db.insert(homeBanners).values(defaultBanners);
+    }
+
+    // 7. Seed Gallery Photos
     const galleryCount = await db.select({ count: count() }).from(galleryPhotos);
     if (galleryCount[0].count === 0) {
       console.log("[Database] Seeding default gallery photos...");

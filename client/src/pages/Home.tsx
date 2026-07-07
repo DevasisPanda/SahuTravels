@@ -13,7 +13,7 @@ const defaultSlides = [
     subtitle: "Premium bus services across Rajasthan and beyond",
     image: "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=1200&h=600&fit=crop",
     cta: "Book Now",
-    ctaLink: "/booking",
+    ctaLink: "https://www.sahubus.in/m/#/tabs/home",
   },
   {
     id: 2,
@@ -161,7 +161,7 @@ export default function Home() {
               {get("discount_description")}
             </p>
             <Button
-              onClick={() => setLocation("/booking")}
+              onClick={() => window.location.href = "https://www.sahubus.in/m/#/tabs/home"}
               className="bg-black hover:bg-gray-900 text-yellow-400 font-bold py-4 px-8 rounded-lg text-lg flex items-center gap-2 mx-auto"
             >
               Book Now <ArrowRight size={24} />
@@ -201,7 +201,7 @@ export default function Home() {
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
           <Button
-            onClick={() => setLocation("/booking")}
+            onClick={() => window.location.href = "https://www.sahubus.in/m/#/tabs/home"}
             className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded-lg text-lg"
           >
             Book Now

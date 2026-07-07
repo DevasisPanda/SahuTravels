@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, MapPin, Calendar, Bus, User, Phone, Check } from "lucide-react";
 
 export default function RouteSurvey() {
+  const queryParams = new URLSearchParams(window.location.search);
+  const token = queryParams.get("token") || "";
+
+  const verifyQuery = trpc.survey.verifyLink.useQuery(
+    { token },
+    { enabled: !!token, retry: false }
+  );
+
   const [selectedRoutes, setSelectedRoutes] = useState<string[]>([]);
   const [otherRoute, setOtherRoute] = useState("");
   const [frequency, setFrequency] = useState("");
@@ -23,6 +31,72 @@ export default function RouteSurvey() {
       toast.error(err.message || "Failed to submit survey");
     },
   });
+
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center py-16 px-4">
+        <div className="max-w-xl w-full bg-gray-900 border-2 border-red-500 rounded-2xl p-8 md:p-12 text-center shadow-2xl">
+          <div className="w-16 h-16 bg-red-950 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 font-extrabold text-3xl">
+            !
+          </div>
+          <h1 className="text-2xl font-black text-red-500 mb-4 tracking-wide uppercase">
+            Access Denied / प्रवेश वर्जित
+          </h1>
+          <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+            This survey is private and requires a valid survey token to access.
+            <br />
+            <span className="text-red-400 font-semibold text-sm">
+              यह सर्वेक्षण निजी है और इसके लिए एक वैध टोकन की आवश्यकता है।
+            </span>
+          </p>
+          <a href="/">
+            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3">
+              Go Back Home / मुख्य पृष्ठ पर जाएं
+            </Button>
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (verifyQuery.isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-400">Verifying survey link...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (verifyQuery.error || (verifyQuery.data && !verifyQuery.data.isValid)) {
+    const reason = verifyQuery.data?.reason || "Invalid survey token";
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center py-16 px-4">
+        <div className="max-w-xl w-full bg-gray-900 border-2 border-red-500 rounded-2xl p-8 md:p-12 text-center shadow-2xl">
+          <div className="w-16 h-16 bg-red-950 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 font-extrabold text-3xl">
+            !
+          </div>
+          <h1 className="text-2xl font-black text-red-500 mb-4 tracking-wide uppercase">
+            Survey Expired or Invalid
+          </h1>
+          <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+            {reason === "Survey link has expired" ? "This temporary survey link has expired." : "This survey link is invalid or has been revoked."}
+            <br />
+            <span className="text-red-400 font-semibold text-sm">
+              यह सर्वेक्षण लिंक समाप्त या अमान्य हो गया है।
+            </span>
+          </p>
+          <a href="/">
+            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3">
+              Go Back Home / मुख्य पृष्ठ पर जाएं
+            </Button>
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   const routes = [
     { id: "r1", label: "Kota ➔ Nashik (कोटा ➔ नासिक)", via: "Ujjain - Indore - Jalgaon - Nashik" },
@@ -105,7 +179,6 @@ ${suggestions.trim() ? suggestions : "None provided"}
       name: name.trim(),
       rating: 5,
       message: formattedMessage,
-      isPublished: 0, // Keep private from testimonials page!
     });
   };
 
@@ -152,6 +225,11 @@ ${suggestions.trim() ? suggestions : "None provided"}
           <h2 className="text-xl md:text-2xl font-bold text-white mb-1">
             New Route Suggestion Form / नया रूट सुझाव फॉर्म
           </h2>
+          {verifyQuery.data?.label && (
+            <p className="text-lg text-yellow-400 font-extrabold mb-1 uppercase tracking-wide">
+              📋 {verifyQuery.data.label}
+            </p>
+          )}
           <p className="text-yellow-400 font-semibold text-sm">
             Choose Your Preferred Route / अपना पसंदीदा नया रूट चुनें
           </p>

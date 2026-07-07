@@ -1,6 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -32,9 +35,76 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // Trust proxy for secure cookies and rate limiting behind reverse proxies (e.g. Nginx, Cloudflare)
+  app.set("trust proxy", 1);
+
+  // Configure CORS
+  app.use(
+    cors({
+      origin: true,
+      credentials: true,
+    })
+  );
+
+  // Configure Helmet (Security Headers)
+  app.use(
+    helmet({
+      contentSecurityPolicy: process.env.NODE_ENV === "production" ? {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.google.com"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://via.placeholder.com", "https://res.cloudinary.com"],
+          connectSrc: ["'self'", "ws:", "wss:"],
+          frameSrc: ["'self'", "https://www.google.com", "https://maps.google.com"],
+        },
+      } : false, // Disable CSP in dev to avoid breaking Vite hot module reloading (HMR)
+      crossOriginEmbedderPolicy: false,
+    })
+  );
+
+  // Stateless CSRF Protection Middleware
+  app.use((req, res, next) => {
+    if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
+      const requestedWith = req.header("X-Requested-With");
+      const trpcSource = req.header("x-trpc-source");
+      if (!requestedWith && !trpcSource) {
+        res.status(403).json({ error: "CSRF check failed: Missing security headers" });
+        return;
+      }
+    }
+    next();
+  });
+
+  // Strict Login Rate Limiter (Max 10 requests per 15 minutes)
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many login attempts. Please try again after 15 minutes." },
+  });
+
+  app.use("/api/auth/login", loginLimiter);
+  app.use("/api/auth/admin-login", loginLimiter);
+  app.use("/api/trpc/auth.adminLogin", loginLimiter);
+
+  // General API Rate Limiter (Max 100 requests per 15 minutes)
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests. Please try again after 15 minutes." },
+  });
+
+  app.use("/api/", apiLimiter);
+
+  // Configure body parser with safer size limit (10MB) to allow image uploads while preventing large request DoS
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ limit: "10mb", extended: true }));
   app.use(cookieParser());
   registerCustomAuthRoutes(app);
   // Auto-seed database if empty

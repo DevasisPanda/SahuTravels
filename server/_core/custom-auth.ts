@@ -5,52 +5,9 @@ import { getSessionCookieOptions } from "./cookies";
 import { hashPassword, verifyPassword, generateSessionToken, getSessionExpiry, isValidEmail, isValidPassword } from "./auth-utils";
 
 export function registerCustomAuthRoutes(app: Express) {
-  // User Registration
+  // User Registration (Disabled for security)
   app.post("/api/auth/register", async (req: Request, res: Response) => {
-    try {
-      const { email, password, name, phone } = req.body;
-
-      // Validation
-      if (!email || !password) {
-        res.status(400).json({ error: "Email and password are required" });
-        return;
-      }
-
-      if (!isValidEmail(email)) {
-        res.status(400).json({ error: "Invalid email format" });
-        return;
-      }
-
-      if (!isValidPassword(password)) {
-        res.status(400).json({ error: "Password must be at least 6 characters" });
-        return;
-      }
-
-      // Check if user exists
-      const existingUser = await db.getUserByEmail(email);
-      if (existingUser) {
-        res.status(409).json({ error: "Email already registered" });
-        return;
-      }
-
-      // Create user
-      const hashedPassword = hashPassword(password);
-      const result = await db.createUser({
-        email,
-        password: hashedPassword,
-        name: name || null,
-        phone: phone || null,
-        role: "user",
-        isActive: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      res.status(201).json({ message: "User registered successfully", userId: result.insertId });
-    } catch (error) {
-      console.error("[Auth] Registration failed:", error);
-      res.status(500).json({ error: "Registration failed" });
-    }
+    res.status(403).json({ error: "Registration is disabled on this server." });
   });
 
   // User Login
@@ -132,14 +89,14 @@ export function registerCustomAuthRoutes(app: Express) {
         return;
       }
 
-      // Check if admin
-      if (user.role !== "admin") {
-        res.status(403).json({ error: "Not authorized as admin" });
+      // Verify password first to prevent timing-based user/role enumeration
+      if (!verifyPassword(password, user.password)) {
+        res.status(401).json({ error: "Invalid credentials" });
         return;
       }
 
-      // Verify password
-      if (!verifyPassword(password, user.password)) {
+      // Check if admin
+      if (user.role !== "admin") {
         res.status(401).json({ error: "Invalid credentials" });
         return;
       }

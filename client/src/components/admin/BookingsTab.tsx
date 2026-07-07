@@ -16,7 +16,7 @@ export default function BookingsTab() {
     },
   });
 
-  const handleStatusChange = (id: number, status: string) => {
+  const handleStatusChange = (id: number, status: typeof BOOKING_STATUSES[number]) => {
     updateStatusMutation.mutate({ id, status });
   };
 
@@ -77,7 +77,7 @@ export default function BookingsTab() {
                 <td className="px-4 py-3">
                   <select
                     value={booking.status}
-                    onChange={(e) => handleStatusChange(booking.id, e.target.value)}
+                    onChange={(e) => handleStatusChange(booking.id, e.target.value as typeof BOOKING_STATUSES[number])}
                     aria-label={`Update status for booking ${booking.id}`}
                     className="bg-black text-yellow-400 border border-yellow-400/50 px-2 py-1 rounded font-bold text-sm focus:outline-none focus:border-yellow-400"
                     disabled={updateStatusMutation.isPending}
