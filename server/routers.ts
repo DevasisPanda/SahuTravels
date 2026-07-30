@@ -8,9 +8,6 @@ import { TRPCError } from "@trpc/server";
 import * as authUtils from "./_core/auth-utils";
 import { storagePut } from "./storage";
 import {
-  createBooking,
-  getBookings,
-  updateBookingStatus,
   createFeedback,
   getPublishedFeedback,
   getAllFeedbackForAdmin,
@@ -326,58 +323,6 @@ export const appRouter = router({
       }),
   }),
 
-  bookings: router({
-    create: publicProcedure
-      .input(
-        z.object({
-          name: safeString(255),
-          email: safeStringOptional(320).refine(val => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), { message: "Invalid email format" }),
-          phone: safeString(20),
-          journeyDate: safeString(50),
-          source: safeString(255),
-          destination: safeString(255),
-          busType: safeString(100),
-          passengers: z.number().min(1).max(500),
-          specialRequests: safeStringOptional(1000),
-        })
-      )
-      .mutation(async ({ input }) => {
-        const booking = await createBooking({
-          name: input.name,
-          email: input.email || null,
-          phone: input.phone,
-          journeyDate: input.journeyDate,
-          source: input.source,
-          destination: input.destination,
-          busType: input.busType,
-          passengers: input.passengers,
-          specialRequests: input.specialRequests || null,
-        });
-        return { success: true, id: booking.insertId };
-      }),
-    list: adminProcedure
-      .input(
-        z.object({
-          limit: z.number().int().min(1).max(100).optional(),
-          offset: z.number().int().min(0).optional(),
-        }).optional()
-      )
-      .query(async ({ input }) => {
-        return await getBookings(input?.limit, input?.offset);
-      }),
-    updateStatus: adminProcedure
-      .input(
-        z.object({
-          id: z.number(),
-          status: z.enum(["pending", "confirmed", "cancelled", "completed"]),
-        })
-      )
-      .mutation(async ({ input }) => {
-        await updateBookingStatus(input.id, input.status);
-        return { success: true };
-      }),
-  }),
-
   feedback: router({
     create: publicProcedure
       .input(
@@ -398,12 +343,19 @@ export const appRouter = router({
         });
         return { success: true, id: (feedback as any).insertId };
       }),
-    list: publicProcedure.query(async () => {
-      return await getPublishedFeedback();
-    }),
-    listAll: adminProcedure.query(async () => {
-      return await getAllFeedbackForAdmin();
-    }),
+    list: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ input }) => {
+        return await getPublishedFeedback(input?.limit);
+      }),
+    listAll: adminProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(100).optional(),
+        offset: z.number().int().min(0).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await getAllFeedbackForAdmin(input?.limit, input?.offset);
+      }),
     update: adminProcedure
       .input(
         z.object({
@@ -429,9 +381,11 @@ export const appRouter = router({
   }),
 
   fleet: router({
-    list: publicProcedure.query(async () => {
-      return await getBusFleet();
-    }),
+    list: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ input }) => {
+        return await getBusFleet(input?.limit);
+      }),
     create: adminProcedure
       .input(
         z.object({
@@ -483,9 +437,11 @@ export const appRouter = router({
   }),
 
   banners: router({
-    list: publicProcedure.query(async () => {
-      return await getActiveBanners();
-    }),
+    list: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ input }) => {
+        return await getActiveBanners(input?.limit);
+      }),
     create: adminProcedure
       .input(
         z.object({
@@ -506,9 +462,14 @@ export const appRouter = router({
         });
         return { success: true, id: (banner as any).insertId };
       }),
-    listAll: adminProcedure.query(async () => {
-      return await getAllBanners();
-    }),
+    listAll: adminProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(100).optional(),
+        offset: z.number().int().min(0).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await getAllBanners(input?.limit, input?.offset);
+      }),
     update: adminProcedure
       .input(
         z.object({
@@ -536,13 +497,18 @@ export const appRouter = router({
   }),
 
   gallery: router({
-    list: publicProcedure.query(async () => {
-      return await getGalleryPhotos();
-    }),
-    listByCategory: publicProcedure
-      .input(z.object({ category: z.enum(["AC Interior", "AC Exterior", "Non-AC Interior", "Non-AC Exterior", "Other"]) }))
+    list: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(200).optional() }).optional())
       .query(async ({ input }) => {
-        return await getGalleryPhotosByCategory(input.category);
+        return await getGalleryPhotos(input?.limit);
+      }),
+    listByCategory: publicProcedure
+      .input(z.object({
+        category: z.enum(["AC Interior", "AC Exterior", "Non-AC Interior", "Non-AC Exterior", "Other"]),
+        limit: z.number().int().min(1).max(200).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await getGalleryPhotosByCategory(input.category, input.limit);
       }),
     create: adminProcedure
       .input(
@@ -591,9 +557,14 @@ export const appRouter = router({
         await deleteGalleryPhoto(input.id);
         return { success: true };
       }),
-    listAll: adminProcedure.query(async () => {
-      return await getAllGalleryPhotosForAdmin();
-    }),
+    listAll: adminProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(200).optional(),
+        offset: z.number().int().min(0).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await getAllGalleryPhotosForAdmin(input?.limit, input?.offset);
+      }),
   }),
 
   settings: router({
@@ -648,12 +619,19 @@ export const appRouter = router({
   }),
 
   services: router({
-    list: publicProcedure.query(async () => {
-      return await getServices();
-    }),
-    listAll: adminProcedure.query(async () => {
-      return await getAllServicesForAdmin();
-    }),
+    list: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ input }) => {
+        return await getServices(input?.limit);
+      }),
+    listAll: adminProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(100).optional(),
+        offset: z.number().int().min(0).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await getAllServicesForAdmin(input?.limit, input?.offset);
+      }),
     create: adminProcedure
       .input(
         z.object({
@@ -701,12 +679,19 @@ export const appRouter = router({
   }),
 
   milestones: router({
-    list: publicProcedure.query(async () => {
-      return await getMilestones();
-    }),
-    listAll: adminProcedure.query(async () => {
-      return await getAllMilestonesForAdmin();
-    }),
+    list: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ input }) => {
+        return await getMilestones(input?.limit);
+      }),
+    listAll: adminProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(100).optional(),
+        offset: z.number().int().min(0).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await getAllMilestonesForAdmin(input?.limit, input?.offset);
+      }),
     create: adminProcedure
       .input(
         z.object({
@@ -751,12 +736,19 @@ export const appRouter = router({
   }),
 
   offers: router({
-    list: publicProcedure.query(async () => {
-      return await getOffers();
-    }),
-    listAll: adminProcedure.query(async () => {
-      return await getAllOffersForAdmin();
-    }),
+    list: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ input }) => {
+        return await getOffers(input?.limit);
+      }),
+    listAll: adminProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(100).optional(),
+        offset: z.number().int().min(0).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await getAllOffersForAdmin(input?.limit, input?.offset);
+      }),
     create: adminProcedure
       .input(
         z.object({

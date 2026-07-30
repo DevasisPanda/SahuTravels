@@ -7,8 +7,6 @@ import {
   users,
   sessions,
   InsertSession,
-  busBookings,
-  InsertBusBooking,
   customerFeedback,
   InsertCustomerFeedback,
   busFleet,
@@ -107,7 +105,17 @@ export async function getUserById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  const result = await db.select({
+    id: users.id,
+    email: users.email,
+    name: users.name,
+    phone: users.phone,
+    role: users.role,
+    isActive: users.isActive,
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+    lastSignedIn: users.lastSignedIn,
+  }).from(users).where(eq(users.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -198,37 +206,6 @@ export async function updateUserLastSignedIn(userId: number) {
   await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, userId));
 }
 
-// ============ Booking Functions ============
-
-export async function createBooking(booking: InsertBusBooking): Promise<InsertResult> {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.insert(busBookings).values(booking);
-  return { insertId: getInsertId(result) };
-}
-
-export async function getBookings(limit?: number, offset?: number) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const query = db.select().from(busBookings);
-  if (limit !== undefined && offset !== undefined) {
-    return await query.limit(limit).offset(offset);
-  }
-  if (limit !== undefined) {
-    return await query.limit(limit);
-  }
-  return await query;
-}
-
-export async function updateBookingStatus(bookingId: number, status: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  await db.update(busBookings).set({ status }).where(eq(busBookings.id, bookingId));
-}
-
 // ============ Feedback Functions ============
 
 export async function createFeedback(feedback: InsertCustomerFeedback): Promise<InsertResult> {
@@ -239,18 +216,30 @@ export async function createFeedback(feedback: InsertCustomerFeedback): Promise<
   return { insertId: getInsertId(result) };
 }
 
-export async function getPublishedFeedback() {
+export async function getPublishedFeedback(limit = 50) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(customerFeedback).where(eq(customerFeedback.isPublished, 1));
+  return await db.select({
+    id: customerFeedback.id,
+    name: customerFeedback.name,
+    rating: customerFeedback.rating,
+    message: customerFeedback.message,
+    createdAt: customerFeedback.createdAt,
+  })
+  .from(customerFeedback)
+  .where(eq(customerFeedback.isPublished, 1))
+  .limit(limit);
 }
 
-export async function getAllFeedbackForAdmin() {
+export async function getAllFeedbackForAdmin(limit = 100, offset = 0) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(customerFeedback);
+  return await db.select()
+    .from(customerFeedback)
+    .limit(limit)
+    .offset(offset);
 }
 
 export async function updateFeedback(id: number, data: Partial<InsertCustomerFeedback>) {
@@ -269,11 +258,11 @@ export async function deleteFeedback(id: number) {
 
 // ============ Fleet Functions ============
 
-export async function getBusFleet() {
+export async function getBusFleet(limit = 50) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(busFleet);
+  return await db.select().from(busFleet).limit(limit);
 }
 
 // ============ Banner Functions ============
@@ -286,18 +275,18 @@ export async function createHomeBanner(banner: InsertHomeBanner): Promise<Insert
   return { insertId: getInsertId(result) };
 }
 
-export async function getActiveBanners() {
+export async function getActiveBanners(limit = 10) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(homeBanners).where(eq(homeBanners.isActive, 1));
+  return await db.select().from(homeBanners).where(eq(homeBanners.isActive, 1)).limit(limit);
 }
 
-export async function getAllBanners() {
+export async function getAllBanners(limit = 50, offset = 0) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(homeBanners);
+  return await db.select().from(homeBanners).limit(limit).offset(offset);
 }
 
 export async function updateBanner(id: number, data: Partial<InsertHomeBanner>) {
@@ -324,25 +313,25 @@ export async function createGalleryPhoto(photo: InsertGalleryPhoto): Promise<Ins
   return { insertId: getInsertId(result) };
 }
 
-export async function getGalleryPhotos() {
+export async function getGalleryPhotos(limit = 100) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(galleryPhotos).where(eq(galleryPhotos.isActive, 1));
+  return await db.select().from(galleryPhotos).where(eq(galleryPhotos.isActive, 1)).limit(limit);
 }
 
-export async function getGalleryPhotosByCategory(category: "AC Interior" | "AC Exterior" | "Non-AC Interior" | "Non-AC Exterior" | "Other") {
+export async function getGalleryPhotosByCategory(category: "AC Interior" | "AC Exterior" | "Non-AC Interior" | "Non-AC Exterior" | "Other", limit = 100) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(galleryPhotos).where(and(eq(galleryPhotos.category, category), eq(galleryPhotos.isActive, 1)));
+  return await db.select().from(galleryPhotos).where(and(eq(galleryPhotos.category, category), eq(galleryPhotos.isActive, 1))).limit(limit);
 }
 
-export async function getAllGalleryPhotosForAdmin() {
+export async function getAllGalleryPhotosForAdmin(limit = 100, offset = 0) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(galleryPhotos);
+  return await db.select().from(galleryPhotos).limit(limit).offset(offset);
 }
 
 export async function updateGalleryPhoto(id: number, data: Partial<InsertGalleryPhoto>) {
@@ -427,18 +416,18 @@ export async function createService(service: InsertService): Promise<InsertResul
   return { insertId: getInsertId(result) };
 }
 
-export async function getServices() {
+export async function getServices(limit = 50) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(services).where(eq(services.isActive, 1));
+  return await db.select().from(services).where(eq(services.isActive, 1)).limit(limit);
 }
 
-export async function getAllServicesForAdmin() {
+export async function getAllServicesForAdmin(limit = 50, offset = 0) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(services);
+  return await db.select().from(services).limit(limit).offset(offset);
 }
 
 export async function updateService(id: number, data: Partial<InsertService>) {
@@ -465,18 +454,18 @@ export async function createMilestone(milestone: InsertMilestone): Promise<Inser
   return { insertId: getInsertId(result) };
 }
 
-export async function getMilestones() {
+export async function getMilestones(limit = 50) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(milestones).where(eq(milestones.isActive, 1));
+  return await db.select().from(milestones).where(eq(milestones.isActive, 1)).limit(limit);
 }
 
-export async function getAllMilestonesForAdmin() {
+export async function getAllMilestonesForAdmin(limit = 50, offset = 0) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(milestones);
+  return await db.select().from(milestones).limit(limit).offset(offset);
 }
 
 export async function updateMilestone(id: number, data: Partial<InsertMilestone>) {
@@ -503,18 +492,18 @@ export async function createOffer(offer: InsertOffer): Promise<InsertResult> {
   return { insertId: getInsertId(result) };
 }
 
-export async function getOffers() {
+export async function getOffers(limit = 50) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(offers).where(eq(offers.isActive, 1));
+  return await db.select().from(offers).where(eq(offers.isActive, 1)).limit(limit);
 }
 
-export async function getAllOffersForAdmin() {
+export async function getAllOffersForAdmin(limit = 50, offset = 0) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(offers);
+  return await db.select().from(offers).limit(limit).offset(offset);
 }
 
 export async function updateOffer(id: number, data: Partial<InsertOffer>) {
@@ -602,7 +591,7 @@ export async function seedDatabase() {
         { key: "company_name", value: "SAHU TRAVELS", category: "branding", label: "Company Name" },
         { key: "established_year", value: "1989", category: "branding", label: "Established Year" },
         { key: "company_description", value: "Your trusted travel partner since 1989, providing comfortable and reliable bus travel services across Rajasthan and beyond.", category: "branding", label: "Company Description" },
-        { key: "nav_banner_text", value: "🚌 Welcome to Sahu Travels - Your Fantasy, Our Mission 🚌", category: "branding", label: "Navigation Top Bar Banner Text" },
+        { key: "nav_banner_text", value: "Welcome to Sahu Travels - Your Fantasy, Our Mission", category: "branding", label: "Navigation Top Bar Banner Text" },
         { key: "mission_text", value: "To provide affordable, comfortable, and safe bus travel services that exceed customer expectations. We are committed to delivering premium travel experiences with professional service, modern buses, and exceptional customer care.", category: "about", label: "Company Mission Statement" },
         { key: "vision_text", value: "To become the most trusted and preferred bus travel company in India, known for reliability, comfort, and customer satisfaction. We aim to expand our services across all major cities while maintaining our commitment to quality and safety.", category: "about", label: "Company Vision Statement" },
         { key: "stat_buses", value: "35+", category: "stats", label: "Buses Count Stat" },

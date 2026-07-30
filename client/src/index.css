@@ -393,3 +393,15 @@ html {
 .carousel-slide-enter {
   animation: carouselSlide 0.5s ease-in-out;
 }
+
+@keyframes loadingBar {
+  0% { left: -50%; width: 40%; }
+  50% { width: 60%; }
+  100% { left: 100%; width: 40%; }
+}
+
+.animate-loading-bar {
+  position: absolute;
+  height: 100%;
+  animation: loadingBar 1.5s infinite linear;
+}

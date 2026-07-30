@@ -17,6 +17,8 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import RouteSurvey from "./pages/RouteSurvey";
+import { useSiteSettings } from "./hooks/useSiteSettings";
+import LoadingScreen from "./components/LoadingScreen";
 
 function withLayout(Component: () => React.JSX.Element) {
   return () => (
@@ -48,6 +50,12 @@ function Router() {
 }
 
 function App() {
+  const { isLoading } = useSiteSettings();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">

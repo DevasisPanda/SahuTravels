@@ -16,7 +16,7 @@ const fallbackSettings: Record<string, string> = {
   company_name: "SAHU TRAVELS",
   established_year: "1989",
   company_description: "Your trusted travel partner since 1989, providing comfortable and reliable bus travel services across Rajasthan and beyond.",
-  nav_banner_text: "🚌 Welcome to Sahu Travels - Your Fantasy, Our Mission 🚌",
+  nav_banner_text: "Welcome to Sahu Travels - Your Fantasy, Our Mission",
   mission_text: "To provide affordable, comfortable, and safe bus travel services that exceed customer expectations. We are committed to delivering premium travel experiences with professional service, modern buses, and exceptional customer care.",
   vision_text: "To become the most trusted and preferred bus travel company in India, known for reliability, comfort, and customer satisfaction. We aim to expand our services across all major cities while maintaining our commitment to quality and safety.",
   stat_buses: "35+",

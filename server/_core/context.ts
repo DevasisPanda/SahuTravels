@@ -3,16 +3,18 @@ import type { User } from "../../drizzle/schema";
 import { COOKIE_NAME } from "../../shared/const";
 import * as db from "../db";
 
+export type SafeUser = Omit<User, "password">;
+
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
-  user: User | null;
+  user: SafeUser | null;
 };
 
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
-  let user: User | null = null;
+  let user: SafeUser | null = null;
 
   try {
     const token = opts.req.cookies[COOKIE_NAME];

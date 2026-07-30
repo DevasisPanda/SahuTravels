@@ -97,7 +97,7 @@ export default function HeroCarousel({ slides = defaultSlides }: HeroCarouselPro
 
   return (
     <div
-      className="relative w-full h-[600px] md:h-[700px] overflow-hidden rounded-2xl"
+      className="relative w-full h-[480px] sm:h-[550px] md:h-[620px] lg:h-[680px] max-h-[80vh] overflow-hidden rounded-2xl shadow-2xl"
       onMouseEnter={() => setIsAutoPlay(false)}
       onMouseLeave={() => setIsAutoPlay(true)}
     >

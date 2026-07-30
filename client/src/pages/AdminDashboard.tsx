@@ -2,10 +2,19 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { LogOut, BookOpen, ImageIcon, Settings, MapPin, Milestone, Gift, Truck, MessageSquare } from "lucide-react";
+import {
+  LogOut,
+  ImageIcon,
+  Settings,
+  MapPin,
+  Milestone,
+  Gift,
+  Bus,
+  MessageSquare,
+  Camera,
+  Compass,
+} from "lucide-react";
 
-// Import tab components
-import BookingsTab from "@/components/admin/BookingsTab";
 import BannersTab from "@/components/admin/BannersTab";
 import GalleryTab from "@/components/admin/GalleryTab";
 import SettingsTab from "@/components/admin/SettingsTab";
@@ -60,28 +69,28 @@ export default function AdminDashboard() {
       <header className="bg-gray-900 border-b-2 border-yellow-400 p-6">
         <div className="container mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold text-yellow-400">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-yellow-400 tracking-wide">
               Admin Dashboard
             </h1>
-            <p className="text-gray-400 mt-2">Welcome, {user?.name}</p>
+            <p className="text-gray-400 mt-1 text-sm">Welcome, {user?.name}</p>
           </div>
           <Button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+            className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2 text-sm font-bold"
           >
-            <LogOut size={20} /> Logout
+            <LogOut size={18} /> Logout
           </Button>
         </div>
       </header>
 
       {/* Navigation Tabs */}
       <div className="bg-gray-900 border-b border-yellow-400 p-4">
-        <div className="container mx-auto flex gap-4 justify-between max-w-6xl">
+        <div className="container mx-auto flex flex-wrap gap-3 justify-between max-w-6xl">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-bold transition ${
+              className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition text-sm ${
                 activeTab === tab.id
                   ? "bg-yellow-400 text-black shadow-lg shadow-yellow-400/20"
                   : "bg-gray-800 text-yellow-400 hover:bg-gray-700"
@@ -95,29 +104,29 @@ export default function AdminDashboard() {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 md:p-6">
         {/* Sub-tab navigation for Media CMS */}
         {activeTab === "media" && (
-          <div className="flex gap-3 mb-8 border-b border-gray-800 pb-4">
+          <div className="flex flex-wrap gap-3 mb-8 border-b border-gray-800 pb-4">
             <button
               onClick={() => setActiveMediaSubTab("banners")}
-              className={`px-5 py-2.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition text-sm ${
                 activeMediaSubTab === "banners"
                   ? "bg-yellow-400 text-black"
                   : "bg-gray-900 text-yellow-400 hover:bg-gray-800 border border-yellow-400/20"
               }`}
             >
-              🖼️ Home Banners
+              <ImageIcon size={18} /> Home Banners
             </button>
             <button
               onClick={() => setActiveMediaSubTab("gallery")}
-              className={`px-5 py-2.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition text-sm ${
                 activeMediaSubTab === "gallery"
                   ? "bg-yellow-400 text-black"
                   : "bg-gray-900 text-yellow-400 hover:bg-gray-800 border border-yellow-400/20"
               }`}
             >
-              📸 Gallery Photos
+              <Camera size={18} /> Gallery Photos
             </button>
           </div>
         )}
@@ -127,43 +136,43 @@ export default function AdminDashboard() {
           <div className="flex flex-wrap gap-3 mb-8 border-b border-gray-800 pb-4">
             <button
               onClick={() => setActiveContentSubTab("services")}
-              className={`px-5 py-2.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition text-sm ${
                 activeContentSubTab === "services"
                   ? "bg-yellow-400 text-black"
                   : "bg-gray-900 text-yellow-400 hover:bg-gray-800 border border-yellow-400/20"
               }`}
             >
-              🎯 Services CMS
+              <Compass size={18} /> Services CMS
             </button>
             <button
               onClick={() => setActiveContentSubTab("fleet")}
-              className={`px-5 py-2.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition text-sm ${
                 activeContentSubTab === "fleet"
                   ? "bg-yellow-400 text-black"
                   : "bg-gray-900 text-yellow-400 hover:bg-gray-800 border border-yellow-400/20"
               }`}
             >
-              🚌 Fleet CMS
+              <Bus size={18} /> Fleet CMS
             </button>
             <button
               onClick={() => setActiveContentSubTab("offers")}
-              className={`px-5 py-2.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition text-sm ${
                 activeContentSubTab === "offers"
                   ? "bg-yellow-400 text-black"
                   : "bg-gray-900 text-yellow-400 hover:bg-gray-800 border border-yellow-400/20"
               }`}
             >
-              🎉 Offers CMS
+              <Gift size={18} /> Offers CMS
             </button>
             <button
               onClick={() => setActiveContentSubTab("milestones")}
-              className={`px-5 py-2.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition text-sm ${
                 activeContentSubTab === "milestones"
                   ? "bg-yellow-400 text-black"
                   : "bg-gray-900 text-yellow-400 hover:bg-gray-800 border border-yellow-400/20"
               }`}
             >
-              📖 Timeline CMS
+              <Milestone size={18} /> Timeline CMS
             </button>
           </div>
         )}
