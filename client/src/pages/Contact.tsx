@@ -1,14 +1,15 @@
 import { Phone, Mail, MapPin, Clock, ExternalLink } from "lucide-react";
-import { Link } from "wouter";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function Contact() {
   const { get } = useSiteSettings();
 
   const rawEmbedUrl = get("google_maps_embed");
-  const safeEmbedUrl = (rawEmbedUrl.startsWith("https://www.google.com/maps/embed") || rawEmbedUrl.startsWith("https://www.google.com/maps/d/embed"))
-    ? rawEmbedUrl
-    : "about:blank";
+  const safeEmbedUrl =
+    rawEmbedUrl.startsWith("https://www.google.com/maps/embed") ||
+    rawEmbedUrl.startsWith("https://www.google.com/maps/d/embed")
+      ? rawEmbedUrl
+      : "about:blank";
 
   const validateUrl = (url: string): string => {
     if (!url) return "";
@@ -21,195 +22,137 @@ export default function Contact() {
   const safeInstagramUrl = validateUrl(get("instagram_url"));
 
   return (
-    <div>
-
+    <div className="bg-white text-black min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-black via-gray-900 to-black text-white py-20">
-        <div className="container mx-auto px-4">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl text-gray-300">
+      <section className="bg-gradient-to-r from-black via-gray-900 to-black text-white py-16 md:py-20 border-b-4 border-yellow-400">
+        <div className="max-w-7xl mx-auto px-4 text-center sm:text-left">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-yellow-400 mb-3 tracking-wide">Contact Us</h1>
+          <p className="text-lg sm:text-xl text-gray-300 font-medium">
             Get in touch with {get("company_name")} for bookings and inquiries
           </p>
         </div>
       </section>
 
-      {/* Contact Information Cards */}
+      {/* Contact Information Cards - Completely fixed for long email/phone text overflow */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Phone */}
-            <div className="bg-gradient-to-br from-black to-gray-900 p-8 rounded-lg shadow-lg text-center border-2 border-yellow-400 hover:shadow-xl transition">
-              <Phone className="text-yellow-400 mx-auto mb-4" size={40} />
-              <h3 className="text-lg font-semibold mb-4 text-white">Phone</h3>
-              <div className="space-y-2">
-                <a href={`tel:${get("phone_primary")}`} className="text-yellow-300 hover:text-yellow-400 block font-semibold">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {/* Phone Card */}
+            <div className="bg-gradient-to-br from-black to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl text-center border-2 border-yellow-400 hover:shadow-2xl transition duration-300 flex flex-col items-center justify-start min-w-0 overflow-hidden">
+              <Phone className="text-yellow-400 mb-4 shrink-0" size={36} />
+              <h3 className="text-lg font-extrabold mb-3 text-white uppercase tracking-wider">Phone</h3>
+              <div className="space-y-2 w-full min-w-0">
+                <a
+                  href={`tel:${get("phone_primary")}`}
+                  className="text-yellow-300 hover:text-yellow-400 block font-bold text-sm sm:text-base break-words hover:underline"
+                >
                   +91 {get("phone_primary")}
                 </a>
                 {get("phone_secondary") && (
-                  <a href={`tel:${get("phone_secondary")}`} className="text-yellow-300 hover:text-yellow-400 block font-semibold">
+                  <a
+                    href={`tel:${get("phone_secondary")}`}
+                    className="text-yellow-300 hover:text-yellow-400 block font-bold text-sm sm:text-base break-words hover:underline"
+                  >
                     +91 {get("phone_secondary")}
                   </a>
                 )}
               </div>
             </div>
 
-            {/* Email */}
-            <div className="bg-gradient-to-br from-black to-gray-900 p-8 rounded-lg shadow-lg text-center border-2 border-yellow-400 hover:shadow-xl transition">
-              <Mail className="text-yellow-400 mx-auto mb-4" size={40} />
-              <h3 className="text-lg font-semibold mb-4 text-white">Email</h3>
-              <div className="space-y-2">
-                <a href={`mailto:${get("email_primary")}`} className="text-yellow-300 hover:text-yellow-400 block font-semibold">
+            {/* Email Card - Fixed long email text wrapping inside card */}
+            <div className="bg-gradient-to-br from-black to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl text-center border-2 border-yellow-400 hover:shadow-2xl transition duration-300 flex flex-col items-center justify-start min-w-0 overflow-hidden">
+              <Mail className="text-yellow-400 mb-4 shrink-0" size={36} />
+              <h3 className="text-lg font-extrabold mb-3 text-white uppercase tracking-wider">Email</h3>
+              <div className="space-y-2 w-full min-w-0 overflow-hidden">
+                <a
+                  href={`mailto:${get("email_primary")}`}
+                  className="text-yellow-300 hover:text-yellow-400 block font-bold text-xs sm:text-sm md:text-base break-all sm:break-words px-1 hover:underline"
+                >
                   {get("email_primary")}
                 </a>
                 {get("email_secondary") && (
-                  <a href={`mailto:${get("email_secondary")}`} className="text-yellow-300 hover:text-yellow-400 block font-semibold">
+                  <a
+                    href={`mailto:${get("email_secondary")}`}
+                    className="text-yellow-300 hover:text-yellow-400 block font-bold text-xs sm:text-sm md:text-base break-all sm:break-words px-1 hover:underline"
+                  >
                     {get("email_secondary")}
                   </a>
                 )}
               </div>
             </div>
 
-            {/* Location */}
-            <div className="bg-gradient-to-br from-black to-gray-900 p-8 rounded-lg shadow-lg text-center border-2 border-yellow-400 hover:shadow-xl transition">
-              <MapPin className="text-yellow-400 mx-auto mb-4" size={40} />
-              <h3 className="text-lg font-semibold mb-4 text-white">Location</h3>
-              <div className="text-gray-300 text-sm leading-relaxed">
+            {/* Location Card */}
+            <div className="bg-gradient-to-br from-black to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl text-center border-2 border-yellow-400 hover:shadow-2xl transition duration-300 flex flex-col items-center justify-start min-w-0 overflow-hidden">
+              <MapPin className="text-yellow-400 mb-4 shrink-0" size={36} />
+              <h3 className="text-lg font-extrabold mb-3 text-white uppercase tracking-wider">Location</h3>
+              <div className="text-gray-300 text-xs sm:text-sm font-medium leading-relaxed w-full min-w-0 break-words">
                 <p>{get("address_line1")}</p>
                 <p>{get("address_line2")}</p>
                 <p>{get("address_city")}</p>
               </div>
             </div>
 
-            {/* Hours */}
-            <div className="bg-gradient-to-br from-black to-gray-900 p-8 rounded-lg shadow-lg text-center border-2 border-yellow-400 hover:shadow-xl transition">
-              <Clock className="text-yellow-400 mx-auto mb-4" size={40} />
-              <h3 className="text-lg font-semibold mb-4 text-white">Hours</h3>
-              <p className="text-yellow-300 font-semibold mb-2">{get("business_hours")}</p>
-              <p className="text-gray-300 text-sm">For all your travel needs</p>
+            {/* Hours Card */}
+            <div className="bg-gradient-to-br from-black to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl text-center border-2 border-yellow-400 hover:shadow-2xl transition duration-300 flex flex-col items-center justify-start min-w-0 overflow-hidden">
+              <Clock className="text-yellow-400 mb-4 shrink-0" size={36} />
+              <h3 className="text-lg font-extrabold mb-3 text-white uppercase tracking-wider">Hours</h3>
+              <p className="text-yellow-300 font-extrabold text-base sm:text-lg mb-1">{get("business_hours")}</p>
+              <p className="text-gray-300 text-xs sm:text-sm font-medium">For all your travel needs</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Map Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-4 text-black">Find Us on Google Maps</h2>
-          <p className="text-center text-gray-600 mb-8">Visit our location in {get("address_city").split(",")[0] || "Kota"}, Rajasthan</p>
-          
-          <div className="w-full h-96 bg-gray-300 rounded-lg shadow-lg overflow-hidden border-4 border-yellow-400 mb-8">
+      <section className="py-16 bg-gray-50 border-t border-yellow-400/20">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-3 text-black">Find Us on Google Maps</h2>
+          <p className="text-center text-gray-600 mb-8 font-medium">Visit our location in {get("address_city").split(",")[0] || "Kota"}, Rajasthan</p>
+
+          <div className="w-full h-80 sm:h-96 bg-gray-300 rounded-2xl shadow-xl overflow-hidden border-4 border-yellow-400 mb-8">
             <iframe
               src={safeEmbedUrl}
-              sandbox="allow-scripts allow-same-origin allow-popups"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
+              title="Sahu Travels Location"
             ></iframe>
           </div>
 
-          {/* Google Maps Link */}
-          <div className="text-center">
-            <a
-              href={safeMapsLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded-lg transition transform hover:scale-105 shadow-lg"
-            >
-              <ExternalLink size={20} />
-              Open in Google Maps
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Detailed Contact Information */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Office Information */}
-            <div className="bg-gradient-to-br from-black to-gray-900 p-8 rounded-lg border-2 border-yellow-400">
-              <h2 className="text-3xl font-bold mb-8 text-white">Office Information</h2>
-              
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-2xl font-bold text-yellow-400 mb-4">
-                    Main Office
-                  </h3>
-                  <div className="text-gray-300 space-y-2 text-lg">
-                    <p className="font-semibold">{get("company_name")}</p>
-                    <p>{get("address_line1")}</p>
-                    <p>{get("address_line2")}</p>
-                    <p>{get("address_city")}</p>
-                    <p>India</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-2xl font-bold text-yellow-400 mb-4">
-                    Contact Hours
-                  </h3>
-                  <div className="text-gray-300 space-y-2 text-lg">
-                    <p>Monday - Sunday: {get("business_hours")}</p>
-                    <p>Holidays: Open</p>
-                    <p className="text-yellow-300 font-semibold">Always available for bookings</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-2xl font-bold text-yellow-400 mb-4">
-                    Established
-                  </h3>
-                  <p className="text-gray-300 text-lg">{get("established_year")} in {get("address_city").split(",")[0] || "Kota"}, Rajasthan</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Links & Services */}
-            <div className="bg-gradient-to-br from-black to-gray-900 p-8 rounded-lg border-2 border-yellow-400">
-              <h2 className="text-3xl font-bold mb-8 text-white">Quick Links</h2>
-              
-              <div className="space-y-4">
-                <a href="https://www.sahubus.in/m/#/tabs/home" className="block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition text-center">
-                  Book a Bus
-                </a>
-                <Link href="/services" className="block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition text-center">
-                  Our Services
-                </Link>
-                <Link href="/fleet" className="block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition text-center">
-                  View Fleet
-                </Link>
-                <Link href="/offers" className="block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition text-center">
-                  Special Offers
-                </Link>
-              </div>
-
-              <div className="mt-8 pt-8 border-t border-yellow-400">
-                <h3 className="text-xl font-bold text-yellow-400 mb-4">Follow Us</h3>
-                <p className="text-gray-300 mb-4">
-                  Connect with us on social media for updates and special offers.
-                </p>
-                <div className="flex gap-4">
-                  {safeFacebookUrl && (
-                    <a href={safeFacebookUrl} target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:text-yellow-300 font-semibold">
-                      Facebook
-                    </a>
-                  )}
-                  {safeInstagramUrl && (
-                    <a href={safeInstagramUrl} target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:text-yellow-300 font-semibold">
-                      Instagram
-                    </a>
-                  )}
-                  {get("whatsapp_number") && (
-                    <a href={`https://wa.me/${get("whatsapp_number")}`} target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:text-yellow-300 font-semibold">
-                      WhatsApp
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
+          <div className="flex flex-wrap gap-4 justify-center items-center">
+            {safeMapsLink !== "#" && (
+              <a
+                href={safeMapsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold py-3 px-6 rounded-xl shadow-md transition transform hover:scale-105"
+              >
+                Open in Google Maps <ExternalLink size={18} />
+              </a>
+            )}
+            {safeFacebookUrl && (
+              <a
+                href={safeFacebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition transform hover:scale-105"
+              >
+                Facebook Page <ExternalLink size={18} />
+              </a>
+            )}
+            {safeInstagramUrl && (
+              <a
+                href={safeInstagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500 hover:opacity-90 text-white font-bold py-3 px-6 rounded-xl shadow-md transition transform hover:scale-105"
+              >
+                Instagram Profile <ExternalLink size={18} />
+              </a>
+            )}
           </div>
         </div>
       </section>
